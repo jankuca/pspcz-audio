@@ -45,6 +45,25 @@ function listAudioZaznamy(idSnemovny, idJednacihoDne) {
 }
 
 
+function getStenozaznam(idSnemovny, idSchuze, idStenozaznamu) {
+  return fetch(`http://www.psp.cz/eknih/${idSnemovny}/stenprot/${idSchuze}/${idStenozaznamu}.htm`)
+    .then((res) => {
+      return res.text()
+    })
+    .then((html) => {
+      const paragraphs = []
+      const contentsHtml = html.match(/<!-- ex -->[\s\n]*([\s\S]*?)[\s\n]*<!-- sy -->/)[1]
+      contentsHtml.replace(/<p align="justify">(.*?)<\/p>/g, (match, content) => {
+        paragraphs.push(
+          content
+            .replace(/<a href="\//g, '<a target="_blank" href="http://www.psp.cz/')
+        )
+      })
+      return paragraphs
+    })
+}
+
+
 module.exports = class Api {
   handle(req, res, { pathname, query }) {
     const apiPathname = pathname.replace(/^\/api\//, '/')
@@ -75,6 +94,12 @@ module.exports = class Api {
         return listAudioZaznamy(
           query['snemovna'] || '2017ps',
           query['jednaci-den']
+        )
+      case '/stenozaznamy':
+        return getStenozaznam(
+          query['snemovna'] || '2017ps',
+          query['schuze'],
+          query['stenozaznam']
         )
       default:
         return null
