@@ -49,6 +49,8 @@ export default class extends React.PureComponent {
     currentTimestamp: null,
     indexAudiozaznamu: -1,
     urlAudiozaznamu: null,
+    urlNextAudiozaznamu: null,
+    overlap: null,
     contentsStenozaznamu: {},
     loadingsStenozaznamu: {},
   }
@@ -105,11 +107,14 @@ export default class extends React.PureComponent {
 
   _handlePlayRequestAudiozaznamu = (indexAudiozaznamu) => {
     const audiozaznam = this.props.audiozaznamy[indexAudiozaznamu]
+    const nextAudiozaznam = this.props.audiozaznamy[indexAudiozaznamu + 1]
 
     if (audiozaznam) {
       this.setState({
         indexAudiozaznamu,
         urlAudiozaznamu: audiozaznam['link'],
+        urlNextAudiozaznamu: nextAudiozaznam['link'],
+        overlap: getOverlapAudiozaznamu(audiozaznam, nextAudiozaznam),
       })
     }
   }
@@ -191,6 +196,8 @@ export default class extends React.PureComponent {
           }}>
             <Player
               url={this.state.urlAudiozaznamu}
+              nextUrl={this.state.urlNextAudiozaznamu}
+              overlap={this.state.overlap}
               onPlayNextRequest={this._handlePlayNextRequest}
               onTime={this._handleTime}
             />

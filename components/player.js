@@ -4,6 +4,8 @@ import React from 'react'
 export default class Player extends React.PureComponent {
   props: {
     url: ?string,
+    nextUrl: ?string,
+    overlap: ?number,
     onPlayNextRequest: ?() => void,
     onTime: ?(number) => void,
   }
@@ -12,6 +14,9 @@ export default class Player extends React.PureComponent {
 
   _audio = null
   _loadingAudio = false
+  _nextAudio = null
+  _loadingNextAudio = false
+  _inOverlap = false
 
   componentDidMount() {
     this._startPlaying(this.props)
@@ -19,6 +24,7 @@ export default class Player extends React.PureComponent {
 
   componentWillReceiveProps(nextProps) {
     this._switchAudio(this.props, nextProps)
+    this._prepareNextAudio(this.props, nextProps)
   }
 
   _startPlaying(props) {
@@ -36,6 +42,32 @@ export default class Player extends React.PureComponent {
     }
   }
 
+  _prepareNextAudio(prevProps, nextProps) {
+    if (this._nextAudio && prevProps.nextUrl === nextProps.nextUrl) {
+      return
+    }
+
+    if (this._nextAudio) {
+      this._node.removeChild(this._nextAudio)
+      this._disposeAudio(this._nextAudio)
+      this._nextAudio = null
+      this._loadingNextAudio = false
+    }
+
+    if (this._inOverlap && nextProps.nextUrl) {
+      const nextAudio = this._createAudio(nextProps.nextUrl)
+      nextAudio.oncanplaythrough = () => {
+        this._loadingNextAudio = false
+      }
+
+      this._node.appendChild(nextAudio)
+      this._nextAudio = nextAudio
+      this._loadingNextAudio = true
+    }
+
+    this._inOverlap = false
+  }
+
   _switchAudio(prevProps, nextProps) {
     if (prevProps.url === nextProps.url) {
       return
@@ -48,7 +80,18 @@ export default class Player extends React.PureComponent {
       this._loadingAudio = false
     }
 
-    this._startPlaying(nextProps)
+    if (this._nextAudio && prevProps.nextUrl === nextProps.url) {
+      this._audio = this._nextAudio
+      this._loadingAudio = this._loadingNextAudio
+      this._nextAudio = null
+      this._loadingNextAudio = false
+      this._inOverlap = false
+
+      this._audio.style.display = ''
+      this._play(this._audio, nextProps)
+    } else {
+      this._startPlaying(nextProps)
+    }
   }
 
   _createAudio(url) {
@@ -73,6 +116,11 @@ export default class Player extends React.PureComponent {
         audio.ontimeupdate = () => {
           if (props.onTime) {
             props.onTime(Math.floor(audio.currentTime))
+          }
+
+          if (!this._inOverlap && audio.duration - audio.currentTime < props.overlap) {
+            this._inOverlap = true
+            this._prepareNextAudio(props, props)
           }
         }
 
