@@ -11,6 +11,19 @@ function parseTime(timestamp) {
   return hrs * 3600 + (mins || 0) * 60 + (secs || 0)
 }
 
+function getOverlapAudiozaznamu(audiozaznam, nextAudiozaznam) {
+  if (!nextAudiozaznam) {
+    return null
+  }
+
+  // NOTE: The overlap is always ~1.5s off.
+  const currentEnd = parseTime(audiozaznam['to_time']) - 1.5
+  const nextStart = parseTime(nextAudiozaznam['from_time'])
+
+  // NOTE: Overlap in seconds.
+  return Math.max(0, currentEnd - nextStart)
+}
+
 function pad(value, length) {
   let str = String(value)
   while (str.length < length) {
@@ -101,6 +114,10 @@ export default class extends React.PureComponent {
     }
   }
 
+  _handlePlayNextRequest = () => {
+    this._handlePlayRequestAudiozaznamu(this.state.indexAudiozaznamu + 1)
+  }
+
   _handleTime = (currentAudioProgress) => {
     const audiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu]
     if (!audiozaznam) {
@@ -174,6 +191,7 @@ export default class extends React.PureComponent {
           }}>
             <Player
               url={this.state.urlAudiozaznamu}
+              onPlayNextRequest={this._handlePlayNextRequest}
               onTime={this._handleTime}
             />
 

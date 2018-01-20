@@ -4,6 +4,7 @@ import React from 'react'
 export default class Player extends React.PureComponent {
   props: {
     url: ?string,
+    onPlayNextRequest: ?() => void,
     onTime: ?(number) => void,
   }
 
@@ -72,6 +73,12 @@ export default class Player extends React.PureComponent {
         audio.ontimeupdate = () => {
           if (props.onTime) {
             props.onTime(Math.floor(audio.currentTime))
+          }
+        }
+
+        audio.onended = () => {
+          if (props.onPlayNextRequest) {
+            props.onPlayNextRequest()
           }
         }
       })
