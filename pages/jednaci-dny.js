@@ -3,6 +3,21 @@ import fetch from 'isomorphic-unfetch'
 
 import Head from 'next/head'
 import Layout from '../components/layout'
+import Player from '../components/player'
+
+
+function parseTime(timestamp) {
+  const [ hrs, mins, secs ] = timestamp.split(':').map(x => Number(x))
+  return hrs * 3600 + (mins || 0) * 60 + (secs || 0)
+}
+
+function pad(value, length) {
+  let str = String(value)
+  while (str.length < length) {
+    str = `0${str}`
+  }
+  return str
+}
 
 
 export default class extends React.PureComponent {
@@ -18,7 +33,9 @@ export default class extends React.PureComponent {
   }
 
   state = {
+    currentTimestamp: null,
     indexAudiozaznamu: -1,
+    urlAudiozaznamu: null,
     contentsStenozaznamu: {},
     loadingsStenozaznamu: {},
   }
@@ -79,8 +96,29 @@ export default class extends React.PureComponent {
     if (audiozaznam) {
       this.setState({
         indexAudiozaznamu,
+        urlAudiozaznamu: audiozaznam['link'],
       })
     }
+  }
+
+  _handleTime = (currentAudioProgress) => {
+    const audiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu]
+    if (!audiozaznam) {
+      this.setState({
+        currentTimestamp: null,
+      })
+      return
+    }
+
+    const currentAudioStartTime = parseTime(audiozaznam['from_time'])
+    const currentTime = currentAudioStartTime + currentAudioProgress
+    const currentHrs = Math.floor(currentTime / 3600)
+    const currentMins = Math.floor((currentTime % 3600) / 60)
+    const currentSecs = currentTime % 60
+
+    this.setState({
+      currentTimestamp: `${currentHrs}:${pad(currentMins, 2)}:${pad(currentSecs, 2)}`,
+    })
   }
 
   render() {
@@ -134,6 +172,24 @@ export default class extends React.PureComponent {
             padding: '20px 0',
             textAlign: 'justify',
           }}>
+            <Player
+              url={this.state.urlAudiozaznamu}
+              onTime={this._handleTime}
+            />
+
+            {this.state.urlAudiozaznamu && this.state.currentTimestamp &&
+              <div style={{
+                fontFamily: '"Fira Code", "Menlo", monospace',
+                fontSize: '13px',
+                fontWeight: 'bold',
+              }}>
+                {this.props.idJednacihoDne} {this.state.currentTimestamp}
+                <hr
+                  style={{ margin: '20px 0' }}
+                />
+              </div>
+            }
+
             {contentsStenozaznamu.map((content, index) =>
               <p key={index} dangerouslySetInnerHTML={{ __html: content }} />
             )}
