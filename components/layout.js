@@ -6,10 +6,17 @@ export default ({ children }) => (
     fontSize: '16px',
     lineHeight: '1.5',
     maxWidth: '900px',
-    margin: '50px auto',
+    margin: '20px auto 50px',
     padding: '20px',
   }}>
-    <h1 style={{ textAlign: 'center' }}>Poslanecká sněmovna Parlamentu České republiky</h1>
+    <img
+      src="/static/logo-poslanecka-snemovna-parlamentu-cr.png"
+      alt="Poslanecká sněmovna Parlamentu České republiky"
+      style={{
+        display: 'block',
+        margin: '0 auto 30px',
+      }}
+    />
     <hr />
     {children}
   </div>
