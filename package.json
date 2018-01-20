@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node server",
     "build": "next build",
-    "start": "NODE_ENV=production node server -p $PORT"
+    "start": "NODE_ENV=production node server -p $PORT",
+    "heroku-postbuild": "next build"
   }
 }
