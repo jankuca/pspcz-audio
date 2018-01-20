@@ -33,7 +33,18 @@ export default class extends React.PureComponent {
           textAlign: 'center',
         }}>
           {this.props.jednaciDny.map((jednaciDen) =>
-            <li>{jednaciDen['den']}</li>
+            <li>
+              <a
+                href={`./jednaci-dny?snemovna=${this.props.idSnemovny}&den=${jednaciDen['id']}`}
+                style={{
+                  color: 'blue',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                {jednaciDen['den']}
+              </a>
+            </li>
           )}
         </ul>
       </Layout>

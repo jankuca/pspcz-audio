@@ -20,6 +20,31 @@ function listJednaciDny(idSnemovny) {
 }
 
 
+function listAudioZaznamy(idSnemovny, idJednacihoDne) {
+  return fetch(`http://www.psp.cz/eknih/${idSnemovny}/audio/${idJednacihoDne}/index.htm`)
+    .then((res) => {
+      return res.text()
+    })
+    .then((html) => {
+      const audioZaznamy = []
+      html.replace(
+        /<a href="(\d{16}\.mp3)">(\d{1,2}:\d{2}) - (\d{1,2}:\d{2})<\/a>.*?<a href="[\.\/]+stenprot\/(\d+schuz)\/(s\d+).htm"/g,
+        (match, link, fromTimestamp, toTimestamp, idSchuze, idStenozaznamu) => {
+          audioZaznamy.push({
+            'id': link.replace('.mp3', ''),
+            'from_time': fromTimestamp,
+            'to_time': toTimestamp,
+            'link': `http://www.psp.cz/eknih/${idSnemovny}/audio/${idJednacihoDne}/${link}`,
+            'schuze': idSchuze,
+            'stenozaznam': idStenozaznamu,
+          })
+        }
+      )
+      return audioZaznamy
+    })
+}
+
+
 module.exports = class Api {
   handle(req, res, { pathname, query }) {
     const apiPathname = pathname.replace(/^\/api\//, '/')
@@ -46,6 +71,11 @@ module.exports = class Api {
     switch (apiPathname) {
       case '/jednaci-dny':
         return listJednaciDny(query['snemovna'] || '2017ps')
+      case '/audio-zaznamy':
+        return listAudioZaznamy(
+          query['snemovna'] || '2017ps',
+          query['jednaci-den']
+        )
       default:
         return null
     }
