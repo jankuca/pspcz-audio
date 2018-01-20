@@ -65,8 +65,21 @@ export default class extends React.PureComponent {
   }
 
   _updateStenozaznamy() {
+    const prevAudiozaznam = (this.state.indexAudiozaznamu > 0) ? this.props.audiozaznamy[this.state.indexAudiozaznamu - 1] : null
     const audiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu]
     const nextAudiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu + 1]
+
+    if (
+      prevAudiozaznam &&
+      !this.state.contentsStenozaznamu[prevAudiozaznam['stenozaznam']] &&
+      !this.state.loadingsStenozaznamu[prevAudiozaznam['stenozaznam']]
+    ) {
+      this._loadStenozaznam(
+        prevAudiozaznam['schuze'],
+        prevAudiozaznam['id'],
+        prevAudiozaznam['stenozaznam']
+      )
+    }
 
     if (
       audiozaznam &&
@@ -165,10 +178,18 @@ export default class extends React.PureComponent {
   }
 
   render() {
+    const prevAudiozaznam = (this.state.indexAudiozaznamu > 0) ? this.props.audiozaznamy[this.state.indexAudiozaznamu - 1] : null
     const audiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu]
     const nextAudiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu + 1]
 
     const contentsStenozaznamu = []
+      .concat(
+        (!this.state.inOverlap && prevAudiozaznam) ?
+          this.state.contentsStenozaznamu[prevAudiozaznam['stenozaznam']] || [
+            this.state.loadingsStenozaznamu[prevAudiozaznam['stenozaznam']] ? '(Načítá se…)' : '(Nedostupné)'
+          ] :
+          []
+      )
       .concat(
         audiozaznam ?
           this.state.contentsStenozaznamu[audiozaznam['stenozaznam']] || [
