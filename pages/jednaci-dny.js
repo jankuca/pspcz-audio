@@ -51,6 +51,7 @@ export default class extends React.PureComponent {
     urlAudiozaznamu: null,
     urlNextAudiozaznamu: null,
     overlap: null,
+    inOverlap: false,
     contentsStenozaznamu: {},
     loadingsStenozaznamu: {},
   }
@@ -115,8 +116,15 @@ export default class extends React.PureComponent {
         urlAudiozaznamu: audiozaznam['link'],
         urlNextAudiozaznamu: nextAudiozaznam['link'],
         overlap: getOverlapAudiozaznamu(audiozaznam, nextAudiozaznam),
+        inOverlap: false,
       })
     }
+  }
+
+  _handleOverlap = () => {
+    this.setState({
+      inOverlap: true,
+    })
   }
 
   _handlePlayNextRequest = () => {
@@ -178,7 +186,10 @@ export default class extends React.PureComponent {
                   style={{
                     color: 'blue',
                     cursor: 'pointer',
-                    fontWeight: (indexAudiozaznamu === this.state.indexAudiozaznamu) ? 'bold' : 'normal',
+                    fontWeight: (
+                      indexAudiozaznamu === this.state.indexAudiozaznamu ||
+                      (this.state.inOverlap && indexAudiozaznamu === this.state.indexAudiozaznamu + 1)
+                    ) ? 'bold' : 'normal',
                     textDecoration: 'underline',
                   }}
                   onMouseDown={() => { this._handlePlayRequestAudiozaznamu(indexAudiozaznamu) }}
@@ -198,6 +209,7 @@ export default class extends React.PureComponent {
               url={this.state.urlAudiozaznamu}
               nextUrl={this.state.urlNextAudiozaznamu}
               overlap={this.state.overlap}
+              onOverlap={this._handleOverlap}
               onPlayNextRequest={this._handlePlayNextRequest}
               onTime={this._handleTime}
             />

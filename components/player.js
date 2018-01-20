@@ -6,6 +6,7 @@ export default class Player extends React.PureComponent {
     url: ?string,
     nextUrl: ?string,
     overlap: ?number,
+    onOverlap: ?() => void,
     onPlayNextRequest: ?() => void,
     onTime: ?(number) => void,
   }
@@ -120,6 +121,9 @@ export default class Player extends React.PureComponent {
 
           if (!this._inOverlap && audio.duration - audio.currentTime < props.overlap) {
             this._inOverlap = true
+            if (props.onOverlap) {
+              props.onOverlap()
+            }
             this._prepareNextAudio(props, props)
           }
         }
