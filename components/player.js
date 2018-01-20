@@ -33,7 +33,7 @@ export default class Player extends React.PureComponent {
       const audio = this._createAudio(props.url)
       audio.oncanplaythrough = () => {
         this._loadingAudio = false
-        this._play(audio, props)
+        this._play(audio, 0, props)
       }
 
       this._node.appendChild(audio)
@@ -89,7 +89,7 @@ export default class Player extends React.PureComponent {
       this._inOverlap = false
 
       this._audio.style.display = ''
-      this._play(this._audio, nextProps)
+      this._play(this._audio, prevProps.overlap || 0, nextProps)
     } else {
       this._startPlaying(nextProps)
     }
@@ -111,9 +111,12 @@ export default class Player extends React.PureComponent {
     audio.onended = null
   }
 
-  _play(audio, props) {
+  _play(audio, startTime, props) {
+    audio.currentTime = startTime
     audio.play()
       .then(() => {
+        audio.currentTime = startTime
+
         audio.ontimeupdate = () => {
           if (props.onTime) {
             props.onTime(Math.floor(audio.currentTime))
