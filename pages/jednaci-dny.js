@@ -66,6 +66,7 @@ export default class extends React.PureComponent {
 
   _updateStenozaznamy() {
     const audiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu]
+    const nextAudiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu + 1]
 
     if (
       audiozaznam &&
@@ -76,6 +77,18 @@ export default class extends React.PureComponent {
         audiozaznam['schuze'],
         audiozaznam['id'],
         audiozaznam['stenozaznam']
+      )
+    }
+
+    if (
+      nextAudiozaznam &&
+      !this.state.contentsStenozaznamu[nextAudiozaznam['stenozaznam']] &&
+      !this.state.loadingsStenozaznamu[nextAudiozaznam['stenozaznam']]
+    ) {
+      this._loadStenozaznam(
+        nextAudiozaznam['schuze'],
+        nextAudiozaznam['id'],
+        nextAudiozaznam['stenozaznam']
       )
     }
   }
@@ -153,6 +166,8 @@ export default class extends React.PureComponent {
 
   render() {
     const audiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu]
+    const nextAudiozaznam = this.props.audiozaznamy[this.state.indexAudiozaznamu + 1]
+
     const contentsStenozaznamu = []
       .concat(
         audiozaznam ?
@@ -161,6 +176,14 @@ export default class extends React.PureComponent {
           ] :
           []
       )
+      .concat(
+        (this.state.inOverlap && nextAudiozaznam) ?
+          this.state.contentsStenozaznamu[nextAudiozaznam['stenozaznam']] || [
+            this.state.loadingsStenozaznamu[nextAudiozaznam['stenozaznam']] ? '(Načítá se…)' : '(Nedostupné)'
+          ] :
+          []
+      )
+
     return (
       <Layout>
         <Head>
