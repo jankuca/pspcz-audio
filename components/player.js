@@ -13,6 +13,8 @@ export default class Player extends React.PureComponent {
 
   _node: ?Element
 
+  _ios = false
+
   _audio = null
   _loadingAudio = false
   _nextAudio = null
@@ -20,6 +22,9 @@ export default class Player extends React.PureComponent {
   _inOverlap = false
 
   componentDidMount() {
+    const userAgent = window.navigator.userAgent
+    this._ios = Boolean(userAgent.match(/iPad/i) || userAgent.match(/iPhone/i))
+
     this._startPlaying(this.props)
   }
 
@@ -44,6 +49,12 @@ export default class Player extends React.PureComponent {
   }
 
   _prepareNextAudio(prevProps, nextProps) {
+    // NOTE: Audio preloading is disabled for iOS because audio objects must
+    //   be reused.
+    if (this._ios) {
+      return
+    }
+
     if (this._nextAudio && prevProps.nextUrl === nextProps.nextUrl) {
       return
     }
@@ -74,7 +85,10 @@ export default class Player extends React.PureComponent {
       return
     }
 
-    if (this._audio) {
+    // NOTE: Audio objects are reused on iOS which is why they can only be
+    //   destroyed when the playback should be stopped due to a lack of a URL.
+    //   See: https://www.ibm.com/developerworks/library/wa-ioshtml5/
+    if (this._audio && (!this._ios || !nextProps.url)) {
       this._node.removeChild(this._audio)
       this._disposeAudio(this._audio)
       this._audio = null
@@ -96,7 +110,9 @@ export default class Player extends React.PureComponent {
   }
 
   _createAudio(url) {
-    const audio = new Audio(url)
+    // NOTE: Audio objects are reused on iOS to overcome unavailable autoplay.
+    const audio = (this._ios && this._audio) ? this._audio : new Audio()
+    audio.src = url
     audio.controls = true
     audio.style.display = 'none'
     audio.style.width = '100%'
@@ -128,11 +144,19 @@ export default class Player extends React.PureComponent {
           }
 
           if (!this._inOverlap && audio.duration - audio.currentTime < props.overlap) {
-            this._inOverlap = true
-            if (props.onOverlap) {
-              props.onOverlap()
+            if (this._ios) {
+              this.onended = null
+              if (props.onPlayNextRequest) {
+                props.onPlayNextRequest()
+              }
+            } else {
+              this._inOverlap = true
+              if (props.onOverlap) {
+                props.onOverlap()
+              }
+
+              this._prepareNextAudio(props, props)
             }
-            this._prepareNextAudio(props, props)
           }
         }
 
