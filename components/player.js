@@ -112,7 +112,12 @@ export default class Player extends React.PureComponent {
   }
 
   _play(audio, startTime, props) {
-    audio.currentTime = startTime
+    // NOTE: Seeking is not available until the audio is loaded until which
+    //   duration is NaN (or maybe 0 in some browsers).
+    if (audio.duration) {
+      audio.currentTime = startTime
+    }
+
     audio.play()
       .then(() => {
         audio.currentTime = startTime
