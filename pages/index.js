@@ -46,6 +46,19 @@ export default class extends React.PureComponent {
             cursor: pointer;
             text-decoration: underline;
           }
+
+          @media (max-width: 600px) {
+            .heading {
+              padding: 10px 0;
+              font-size: 20px;
+              font-weight: normal;
+            }
+
+            .day-list {
+              font-size: 16px;
+              line-height: 2em;
+            }
+          }
         `}</style>
 
         <h2 className="heading">Jednací dny</h2>

@@ -268,6 +268,43 @@ export default class extends React.PureComponent {
             font-size: 13px;
             font-weight: bold;
           }
+
+          @media (max-width: 600px) {
+            .heading {
+              padding: 10px 0;
+              font-size: 20px;
+              font-weight: normal;
+            }
+
+            .page {
+              display: block;
+            }
+
+            .sidebar {
+              padding: 0;
+              padding-bottom: 30px;
+            }
+
+            .audio-list {
+              width: auto;
+              font-size: 16px;
+              line-height: 2em;
+              text-align: center;
+            }
+
+            .content {
+              flex: none;
+              padding: 20px;
+            }
+
+            .player-container {
+              margin-bottom: 50px;
+            }
+
+            .timestamp {
+              text-align: center;
+            }
+          }
         `}</style>
 
         <Head>
