@@ -1,4 +1,5 @@
 import React from 'react'
+import classnames from 'classnames'
 import fetch from 'isomorphic-unfetch'
 
 import Head from 'next/head'
@@ -207,35 +208,86 @@ export default class extends React.PureComponent {
 
     return (
       <Layout>
+        <style jsx>{`
+          .heading {
+            margin: 0;
+            padding: 20px 0;
+            border-bottom: 1px solid #AAA;
+            font-size: 20px;
+            text-align: center;
+          }
+
+          .page {
+            display: flex;
+            padding: 35px 0;
+          }
+
+          .sidebar {
+            padding-right: 50px;
+          }
+
+          .audio-list {
+            width: 150px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-family: "Fira Code", "Menlo", monospace;
+            font-size: 13px;
+            text-align: right;
+          }
+
+          .audio-list__item {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+          }
+
+          .audio-list__item--active {
+            font-weight: bold;
+          }
+
+          .content {
+            flex: 1;
+            padding: 0;
+            text-align: justify;
+          }
+
+          .content__separator {
+            margin: 20px 0;
+            border: 0;
+            border-bottom: 1px solid #AAA;
+          }
+
+          .timestamp {
+            display: block;
+            margin: 0;
+            padding: 10px 15px;
+            background-color: #333;
+            color: #EEE;
+            font-family: "Fira Code", "Menlo", monospace;
+            font-size: 13px;
+            font-weight: bold;
+          }
+        `}</style>
+
         <Head>
           <title>Jednací den {this.props.idJednacihoDne} – PSP ČR</title>
         </Head>
 
-        <h2 style={{ textAlign: 'center' }}>Jednací den {this.props.idJednacihoDne}</h2>
-        <hr />
+        <h2 className="heading">Jednací den {this.props.idJednacihoDne}</h2>
 
-        <div style={{ display: 'flex' }}>
-          <div style={{ paddingRight: '50px' }}>
-            <ul style={{
-              width: '150px',
-              margin: '0',
-              padding: '20px 0',
-              listStyle: 'none',
-              fontFamily: '"Fira Code", "Menlo", monospace',
-              fontSize: '13px',
-              textAlign: 'right',
-            }}>
+        <div className="page">
+          <div className="sidebar">
+            <ul className="audio-list">
               {this.props.audiozaznamy.map((audiozaznam, indexAudiozaznamu) =>
                 <li
-                  style={{
-                    color: 'blue',
-                    cursor: 'pointer',
-                    fontWeight: (
+                  className={classnames({
+                    'audio-list__item': true,
+                    'audio-list__item--active': (
                       indexAudiozaznamu === this.state.indexAudiozaznamu ||
                       (this.state.inOverlap && indexAudiozaznamu === this.state.indexAudiozaznamu + 1)
-                    ) ? 'bold' : 'normal',
-                    textDecoration: 'underline',
-                  }}
+                    ),
+                  })}
                   onMouseDown={() => { this._handlePlayRequestAudiozaznamu(indexAudiozaznamu) }}
                 >
                   {audiozaznam['from_time']} – {audiozaznam['to_time']}
@@ -244,32 +296,23 @@ export default class extends React.PureComponent {
             </ul>
           </div>
 
-          <div style={{
-            flex: '1',
-            padding: '20px 0',
-            textAlign: 'justify',
-          }}>
-            <Player
-              url={this.state.urlAudiozaznamu}
-              nextUrl={this.state.urlNextAudiozaznamu}
-              overlap={this.state.overlap}
-              onOverlap={this._handleOverlap}
-              onPlayNextRequest={this._handlePlayNextRequest}
-              onTime={this._handleTime}
-            />
+          <div className="content">
+            <div className="player-container">
+              <Player
+                url={this.state.urlAudiozaznamu}
+                nextUrl={this.state.urlNextAudiozaznamu}
+                overlap={this.state.overlap}
+                onOverlap={this._handleOverlap}
+                onPlayNextRequest={this._handlePlayNextRequest}
+                onTime={this._handleTime}
+              />
 
-            {this.state.urlAudiozaznamu && this.state.currentTimestamp &&
-              <div style={{
-                fontFamily: '"Fira Code", "Menlo", monospace',
-                fontSize: '13px',
-                fontWeight: 'bold',
-              }}>
-                {this.props.idJednacihoDne} {this.state.currentTimestamp}
-                <hr
-                  style={{ margin: '20px 0' }}
-                />
-              </div>
-            }
+              {this.state.urlAudiozaznamu && this.state.currentTimestamp &&
+                <div className="timestamp">
+                  {this.props.idJednacihoDne} {this.state.currentTimestamp}
+                </div>
+              }
+            </div>
 
             {contentsStenozaznamu.map((content, index) =>
               <p key={index} dangerouslySetInnerHTML={{ __html: content }} />

@@ -24,23 +24,37 @@ export default class extends React.PureComponent {
           <title>Audio Poslanecké sněmovny Parlamentu ČR</title>
         </Head>
 
-        <h2 style={{ textAlign: 'center' }}>Jednací dny</h2>
-        <ul style={{
-          padding: '0',
-          listStyle: 'none',
-          fontFamily: '"Fira Code", "Menlo", monospace',
-          fontSize: '13px',
-          textAlign: 'center',
-        }}>
+        <style jsx>{`
+          .heading {
+            margin: 0;
+            padding: 20px 0;
+            border-bottom: 1px solid #AAA;
+            font-size: 20px;
+            text-align: center;
+          }
+
+          .day-list {
+            padding: 0;
+            list-style: none;
+            font-family: "Fira Code", "Menlo", monospace;
+            font-size: 13px;
+            text-align: center;
+          }
+
+          .day-list__item {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+          }
+        `}</style>
+
+        <h2 className="heading">Jednací dny</h2>
+        <ul className="day-list">
           {this.props.jednaciDny.map((jednaciDen) =>
             <li>
               <a
+                className="day-list__item"
                 href={`./jednaci-dny?snemovna=${this.props.idSnemovny}&den=${jednaciDen['id']}`}
-                style={{
-                  color: 'blue',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
               >
                 {jednaciDen['den']}
               </a>
