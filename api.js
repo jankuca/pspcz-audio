@@ -1,21 +1,34 @@
 const fetch = require('node-fetch')
 
 
-function listJednaciDny(idSnemovny) {
-  return fetch(`http://www.psp.cz/eknih/${idSnemovny}/audio/index.htm`)
-    .then((res) => {
-      return res.text()
+function listJednaciDny(idSnemovny, roky) {
+  return Promise.all(
+    roky.map((rok) => {
+      const url = `http://www.psp.cz/eknih/${idSnemovny}/audio/${rok === 'null' ? '' : `${rok}/`}index.htm`
+      return fetch(url).then((res) => ({ res, rok }))
     })
-    .then((html) => {
-      const jednaciDny = []
-      html.replace(/<a href="(\d{4}\/\d{1,2}\/\d{1,2}\/index.htm)"/g, (match, link) => {
-        jednaciDny.push({
-          'id': link.replace('/index.htm', ''),
-          'den': link.split('/').slice(0, 3).reverse().join('.'),
-          'link': `http://www.psp.cz/eknih/${idSnemovny}/audio/${link}`,
+  )
+    .then((responses) => {
+      return Promise.all(
+        responses.map(({ res, rok }) => {
+          return res.text().then((html) => ({ html, rok }))
         })
-      })
-      return jednaciDny
+      )
+    })
+    .then((htmlPerRok) => {
+      return htmlPerRok.map(({ html, rok }) => {
+        const jednaciDny = []
+        html.replace(/<a href="((?:\d{4}\/)?\d{1,2}\/\d{1,2})\/index.htm"/g, (match, link) => {
+          const dateParts = link.split('/').slice(0, 3)
+          const fullDateParts = dateParts.length === 3 ? dateParts : [rok, ...dateParts]
+          jednaciDny.push({
+            'id': fullDateParts.join('/'),
+            'den': [...fullDateParts].reverse().join('.'),
+            'link': `http://www.psp.cz/eknih/${idSnemovny}/audio/${link}/index.htm`,
+          })
+        })
+        return jednaciDny
+      }).flat()
     })
 }
 
@@ -89,7 +102,10 @@ module.exports = class Api {
   _getResult(apiPathname, query) {
     switch (apiPathname) {
       case '/jednaci-dny':
-        return listJednaciDny(query['snemovna'] || '2017ps')
+        return listJednaciDny(
+          query['snemovna'] || '2017ps',
+          query['roky'] ? query['roky'].split(',') : ['null']
+        )
       case '/audio-zaznamy':
         return listAudioZaznamy(
           query['snemovna'] || '2017ps',
