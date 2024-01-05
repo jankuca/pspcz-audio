@@ -37,6 +37,7 @@ export default class Player extends React.PureComponent {
     if (props.url) {
       const audio = this._createAudio(props.url)
       audio.oncanplaythrough = () => {
+        audio.oncanplaythrough = null
         this._loadingAudio = false
         this._play(audio, 0, props)
       }
