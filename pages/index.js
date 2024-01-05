@@ -8,7 +8,7 @@ import Layout from '../components/layout'
 export default class extends React.PureComponent {
   static async getInitialProps({ req }) {
     const urlRoot = (req && req.headers && req.headers['host']) ? `http://${req.headers['host']}` : ''
-    const idSnemovny = '2017ps'
+    const idSnemovny = '2021ps'
     const result = await fetch(`${urlRoot}/api/jednaci-dny?snemovna=${idSnemovny}`)
     const jednaciDny = await result.json()
     return {
