@@ -9,7 +9,8 @@ export default class extends React.PureComponent {
   static async getInitialProps({ req }) {
     const urlRoot = (req && req.headers && req.headers['host']) ? `http://${req.headers['host']}` : ''
     const idSnemovny = '2021ps'
-    const result = await fetch(`${urlRoot}/api/jednaci-dny?snemovna=${idSnemovny}`)
+    const roky = ['2021', '2022', '2023', 'null']
+    const result = await fetch(`${urlRoot}/api/jednaci-dny?snemovna=${idSnemovny}&roky=${roky.join(',')}`)
     const jednaciDny = await result.json()
     return {
       idSnemovny,
